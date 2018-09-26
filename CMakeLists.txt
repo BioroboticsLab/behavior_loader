@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe --tags --abbrev=0" OUTPUT_VARIABLE GIT_TAG)
+exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe --abbrev=0 --tags" OUTPUT_VARIABLE GIT_TAG)
 
 cmake_policy (SET CMP0020 NEW)
 
+message("Git tag: " ${GIT_TAG})
 project(RF_behavior_loader
     VERSION ${GIT_TAG}
     LANGUAGES CXX)
@@ -17,8 +18,8 @@ set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} CACHE STRING
 
 set(TN RF_behavior_loader)
 add_library(${TN} STATIC)
-set_target_properties(${TN} PROPERTIES OUTPUT_NAME RF_behavior_loader)
-include(SrcUtility/CMakeLists.txt)
+set_target_properties(${TN} PROPERTIES OUTPUT_NAME rf_utility)
+include(SrcBehaviorLoader/CMakeLists.txt)
 
 install(
     TARGETS
@@ -68,7 +69,6 @@ install(
 
 install(
     FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/BehaviourPlugin.cmake
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/VSSugar.cmake
     DESTINATION ${INSTALL_CONFIGDIR}/Modules/${PROJECT_NAME}
 )

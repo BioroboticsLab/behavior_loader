@@ -7,6 +7,7 @@ PluginLoader::PluginLoader(QObject *parent)
 	m_PluginLoader = new QPluginLoader(this);
 }
 
+/*---------------------------------------*/
 bool PluginLoader::loadPluginFromFilename(QString const& filename)
 {
 	bool retval = false;
@@ -27,7 +28,7 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 		QString s = m_PluginLoader->errorString();
 		std::string ss = s.toStdString();
 
-        if (!m_PluginLoader->isLoaded())
+    if (!m_PluginLoader->isLoaded())
 		{
 		    qWarning() << ss.c_str();
 		}
@@ -39,16 +40,19 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 	return retval;
 }
 
+/*---------------------------------------*/
 IBehaviourFactory* PluginLoader::getPluginInstance()
 {
 	return qobject_cast<IBehaviourFactory*>(m_PluginLoader->instance());
 }
 
+/*---------------------------------------*/
 QJsonObject PluginLoader::getPluginMetaData() const
 {
 	return m_MetaData;
 }
 
+/*---------------------------------------*/
 void PluginLoader::readMetaDataFromPlugin()
 {
 	m_MetaData = m_PluginLoader->metaData().value("MetaData").toObject();

@@ -1,4 +1,3 @@
-
 #ifndef PLUGINLOADER_H
 #define PLUGINLOADER_H
 
@@ -8,7 +7,7 @@
 #include "QPointer"
 
 class PluginLoader : QObject
-{ 
+{
 	Q_OBJECT
 public:
 	explicit PluginLoader(QObject *parent = 0);
