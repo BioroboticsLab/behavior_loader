@@ -1,0 +1,86 @@
+stages:
+  - build
+  - package
+  - deploy
+
+
+.base ubuntu-18.04: &base_ubuntu_18_04
+  tags: [ linux, docker ]
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:ubuntu-18.04
+
+.base windows: &base_windows
+  tags: [ windows, docker ]
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:windows
+
+
+.build ubuntu-18.04: &build_ubuntu_18_04
+  stage: build
+  <<: *base_ubuntu_18_04
+  variables:
+    CC: gcc-8
+    CXX: g++-8
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 day
+
+.build windows: &build_windows
+  stage: build
+  <<: *base_windows
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 day
+  before_script:
+    - C:/VsDevEnv.ps1 -arch=amd64
+
+build ubuntu-18.04:
+  <<: *build_ubuntu_18_04
+  script:
+    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Release -G Ninja
+    - ninja -C build
+
+build windows:
+  <<: *build_windows
+  script:
+    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_PREFIX_PATH="$Env:VCPKG_INSTALL_DIR"
+    - ninja -C build
+
+build windows[cuda]:
+  <<: *build_windows
+  script:
+    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_PREFIX_PATH="$Env:VCPKG_CUDA_INSTALL_DIR"
+    - ninja -C build
+
+.package: &package
+  stage: package
+  artifacts:
+    paths:
+      - build/*.tar.xz
+    expire_in: 1 week
+  script:
+    - ninja -C build package
+
+package ubuntu-18.04:
+  <<: *base_ubuntu_18_04
+  dependencies:
+    - build ubuntu-18.04
+  <<: *package
+
+package windows:
+  <<: *base_windows
+  dependencies:
+    - build windows
+  <<: *package
+
+package windows[cuda]:
+  <<: *base_windows
+  dependencies:
+    - build windows[cuda]
+  <<: *package
+
+trigger dependents:
+  stage: deploy
+  <<: *base_ubuntu_18_04
+  script:
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://git.imp.fu-berlin.de/api/v4/projects/3654/trigger/pipeline

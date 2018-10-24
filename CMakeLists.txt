@@ -8,6 +8,10 @@ message("Git tag: " ${GIT_TAG})
 project(RF_behavior_loader
     VERSION ${GIT_TAG}
     LANGUAGES CXX)
+	
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    option(PACKAGE_WINDOWS_MSI "Create .msi package" OFF)
+endif()
 
 include(GNUInstallDirs)
 
@@ -18,7 +22,7 @@ set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} CACHE STRING
 
 set(TN RF_behavior_loader)
 add_library(${TN} STATIC)
-set_target_properties(${TN} PROPERTIES OUTPUT_NAME rf_utility)
+set_target_properties(${TN} PROPERTIES OUTPUT_NAME rf_behavior_loader)
 include(SrcBehaviorLoader/CMakeLists.txt)
 
 install(
@@ -73,7 +77,23 @@ install(
     DESTINATION ${INSTALL_CONFIGDIR}/Modules/${PROJECT_NAME}
 )
 
-set(CPACK_GENERATOR "TXZ")
+set(CPACK_PACKAGE_NAME "RoboFish Behavior Loader")
+set(CPACK_PACKAGE_VENDOR "Biorobotics Lab / FU Berlin")
+
 set(CPACK_PACKAGE_VERSION ${GIT_TAG})
+
+if(PACKAGE_WINDOWS_MSI)
+    set(CPACK_GENERATOR "WIX")
+    set(CPACK_WIX_UPGRADE_GUID "1c78d2f3-5d5c-470a-8857-cefb34a9e4fa")
+
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "RoboFish/Libraries")
+
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "RoboFish")
+	
+	set(CPACK_WIX_LICENSE_RTF ${CMAKE_SOURCE_DIR}/cmake/WIX/licence.rtf)
+	set(CPACK_WIX_TEMPLATE "${CMAKE_SOURCE_DIR}/cmake/WIX/WIX.template.in")
+elseif(PACKAGE_TXZ)
+    set(CPACK_GENERATOR "TXZ")
+endif()
 
 include(CPack)
