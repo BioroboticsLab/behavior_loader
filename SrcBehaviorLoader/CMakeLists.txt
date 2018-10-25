@@ -4,8 +4,8 @@ target_include_directories(${TN} PUBLIC
     $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
 )
 
-find_package(RF_Interfaces 0.1 REQUIRED)
-target_link_libraries(${TN} RF_Interfaces)
+find_package(Qt5 REQUIRED COMPONENTS Core)
+target_link_libraries(${TN} Qt5::Core)
 
 set_target_properties(${TN} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${TN} PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
