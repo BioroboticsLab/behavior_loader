@@ -25,6 +25,10 @@ add_library(${TN} STATIC)
 set_target_properties(${TN} PROPERTIES OUTPUT_NAME rf_behavior_loader)
 include(SrcBehaviorLoader/CMakeLists.txt)
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_link_libraries(${TN} stdc++fs)
+endif()
+
 install(
     TARGETS
         RF_behavior_loader
