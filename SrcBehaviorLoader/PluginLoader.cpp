@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <vector>
 #include <filesystem>
-
+#include <sstream>
 
 #ifdef _WIN32
 #include <stdio.h>
