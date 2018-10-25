@@ -81,19 +81,6 @@ set(CPACK_PACKAGE_NAME "RoboFish Behavior Loader")
 set(CPACK_PACKAGE_VENDOR "Biorobotics Lab / FU Berlin")
 
 set(CPACK_PACKAGE_VERSION ${GIT_TAG})
-
-if(PACKAGE_WINDOWS_MSI)
-    set(CPACK_GENERATOR "WIX")
-    set(CPACK_WIX_UPGRADE_GUID "1c78d2f3-5d5c-470a-8857-cefb34a9e4fa")
-
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "RoboFish/Libraries")
-
-    set(CPACK_WIX_PROGRAM_MENU_FOLDER "RoboFish")
-	
-	set(CPACK_WIX_LICENSE_RTF ${CMAKE_SOURCE_DIR}/cmake/WIX/licence.rtf)
-	set(CPACK_WIX_TEMPLATE "${CMAKE_SOURCE_DIR}/cmake/WIX/WIX.template.in")
-elseif(PACKAGE_TXZ)
-    set(CPACK_GENERATOR "TXZ")
-endif()
+set(CPACK_GENERATOR "TXZ")
 
 include(CPack)
