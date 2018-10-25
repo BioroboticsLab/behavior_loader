@@ -77,9 +77,6 @@ install(
     DESTINATION ${INSTALL_CONFIGDIR}/Modules/${PROJECT_NAME}
 )
 
-set(CPACK_PACKAGE_NAME "RoboFish Behavior Loader")
-set(CPACK_PACKAGE_VENDOR "Biorobotics Lab / FU Berlin")
-
 set(CPACK_PACKAGE_VERSION ${GIT_TAG})
 set(CPACK_GENERATOR "TXZ")
 
