@@ -23,6 +23,12 @@ stages:
     paths:
       - build
     expire_in: 1 day
+  before_script:
+    - 'curl -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20ubuntu-18.04"'
+    - 7z e artifacts.zip; 7z e '*.tar.xz'; rm *.tar.xz; 7z x '*.tar'; rm *.tar
+    - mkdir dependencies
+    - name='RF_Interfaces'; mv $name-* dependencies/$name
+    - export CMAKE_PREFIX_PATH="$(pwd)/dependencies"
 
 .build windows: &build_windows
   stage: build
@@ -32,6 +38,11 @@ stages:
       - build
     expire_in: 1 day
   before_script:
+    - 'curl.exe -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20windows%5bcuda%5d"'
+    - 7z e artifacts.zip; 7z e *.tar.xz; Remove-Item -Force *.tar.xz; 7z x *.tar; Remove-Item -Force *.tar
+    - New-Item -ItemType Directory -Force 'dependencies'
+    - $name='RF_Interfaces'; Move-Item -Force "$name-*" dependencies/$name
+    - $env:CMAKE_PREFIX_PATH="$((Get-Item -Path '.').FullName)/dependencies;$env:VCPKG_CUDA_INSTALL_DIR"
     - C:/VsDevEnv.ps1 -arch=amd64
 
 build ubuntu-18.04:
