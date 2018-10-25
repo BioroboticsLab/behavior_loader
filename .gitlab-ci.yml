@@ -54,7 +54,7 @@ build ubuntu-18.04:
 build windows:
   <<: *build_windows
   script:
-    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_PREFIX_PATH="$Env:VCPKG_INSTALL_DIR"
+    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE=Release -G Ninja -DPACKAGE_WINDOWS_MSI=ON -DINSTALL_REQUIRED_SYSTEM_LIBRARIES=ON -DINSTALL_SHARED_LIBRARIES='flang;flangrti;libomp;zlib1' -DINSTALL_OPENCV_COMPONENTS='core' -DCMAKE_PREFIX_PATH="$env:CMAKE_PREFIX_PATH" -DCPACK_PACKAGE_DIRECTORY="$env:PACKAGE_DIR" -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
     - ninja -C build
 
 .package: &package
