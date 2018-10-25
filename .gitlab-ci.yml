@@ -38,7 +38,7 @@ stages:
       - build
     expire_in: 1 day
   before_script:
-    - 'curl.exe -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20windows%5bcuda%5d"'
+    - 'curl.exe -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20windows"'
     - 7z e artifacts.zip; 7z e *.tar.xz; Remove-Item -Force *.tar.xz; 7z x *.tar; Remove-Item -Force *.tar
     - New-Item -ItemType Directory -Force 'dependencies'
     - $name='RF_Interfaces'; Move-Item -Force "$name-*" dependencies/$name
@@ -63,13 +63,6 @@ build windows:
     paths:
       - build/*.tar.xz
     expire_in: 1 week
-  before_script:
-    - 'curl.exe -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20windows%5bcuda%5d"'
-    - 7z e artifacts.zip; 7z e *.tar.xz; Remove-Item -Force *.tar.xz; 7z x *.tar; Remove-Item -Force *.tar
-    - New-Item -ItemType Directory -Force 'dependencies'
-    - $name='RF_Interfaces'; Move-Item -Force "$name-*" dependencies/$name
-    - $env:CMAKE_PREFIX_PATH="$((Get-Item -Path '.').FullName)/dependencies;$env:VCPKG_CUDA_INSTALL_DIR"
-    - C:/VsDevEnv.ps1 -arch=amd64
   script:
     - ninja -C build package
 
@@ -77,12 +70,25 @@ package ubuntu-18.04:
   <<: *base_ubuntu_18_04
   dependencies:
     - build ubuntu-18.04
+  before_script:
+    - 'curl -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20ubuntu-18.04"'
+    - 7z e artifacts.zip; 7z e '*.tar.xz'; rm *.tar.xz; 7z x '*.tar'; rm *.tar
+    - mkdir dependencies
+    - name='RF_Interfaces'; mv $name-* dependencies/$name
+    - export CMAKE_PREFIX_PATH="$(pwd)/dependencies"
   <<: *package
 
 package windows:
   <<: *base_windows
   dependencies:
     - build windows
+  before_script:
+    - 'curl.exe -o artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://git.imp.fu-berlin.de/api/v4/projects/2576/jobs/artifacts/master/download?job=package%20windows%5bcuda%5d"'
+    - 7z e artifacts.zip; 7z e *.tar.xz; Remove-Item -Force *.tar.xz; 7z x *.tar; Remove-Item -Force *.tar
+    - New-Item -ItemType Directory -Force 'dependencies'
+    - $name='RF_Interfaces'; Move-Item -Force "$name-*" dependencies/$name
+    - $env:CMAKE_PREFIX_PATH="$((Get-Item -Path '.').FullName)/dependencies;$env:VCPKG_CUDA_INSTALL_DIR"
+    - C:/VsDevEnv.ps1 -arch=amd64
   <<: *package
 
 trigger dependents:

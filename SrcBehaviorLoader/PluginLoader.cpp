@@ -172,7 +172,7 @@ bool endsWith(std::string value, std::string ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<std::string> list){
+std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<std::string> list, std::string suffix){
 	//Search directories
     std::vector<std::string> filesFromFolders;
 
@@ -182,12 +182,12 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
             if (!file.empty() && file[file.size() - 1] == '/') {
                 for (auto& p : std::filesystem::directory_iterator(file)) {
 					std::string s = p.path().string();
-					if(endsWith(s,".robo_tracker.dll") || endsWith(s,".robo_tracker.so"))
+					if(endsWith(s,suffix+".dll") || endsWith(s,suffix+".so"))
                     	filesFromFolders.push_back(s);
                 }
             }
             else {
-				if(endsWith(f,".robo_tracker.dll") || endsWith(f,".robo_tracker.so"))
+				if(endsWith(f,suffix+".dll") || endsWith(f,suffix+".so"))
                 	filesFromFolders.push_back(f);
             }
         }

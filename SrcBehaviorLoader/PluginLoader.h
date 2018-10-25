@@ -16,7 +16,7 @@ public:
 	QJsonObject getPluginMetaData() const;
 
 	static std::vector<std::string> queryRegistryBehaviors(std::string path);
-	static std::vector<std::string> searchDirectoriesForPlugins(std::vector<std::string> list);
+	static std::vector<std::string> searchDirectoriesForPlugins(std::vector<std::string> list, std::string suffix);
 
 	//return oldPath
 	static const char* addDllPath(std::string file);
