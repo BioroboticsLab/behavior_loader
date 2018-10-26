@@ -202,6 +202,12 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
 PluginLoader::PluginLoader(QObject *parent)
 {
 	m_PluginLoader = new QPluginLoader(this);
+	m_PluginListModel = new QStringListModel();
+}
+PluginLoader::~PluginLoader()
+{
+	delete m_PluginLoader;
+	delete m_PluginListModel;
 }
 
 bool PluginLoader::loadPluginFromFilename(QString const& filename)
@@ -236,6 +242,40 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 	return retval;
 }
 
+bool PluginLoader::loadPluginFromName(QString name) {
+	QString filename = m_PluginMap.find(name)->second;
+	return loadPluginFromFilename(filename);
+}
+
+void PluginLoader::addToPluginList(QString filename) {
+
+	bool isLib = QLibrary::isLibrary(filename);
+
+	if (isLib) {
+
+		QPluginLoader loader;
+		loader.setFileName(filename);
+		QJsonValue pluginMeda(loader.metaData().value("MetaData"));
+		QJsonObject metaObj = pluginMeda.toObject();
+		QString mstring = metaObj.value("name").toString();
+		if (!m_PluginList.contains(mstring))
+			m_PluginList.append(mstring);
+		m_PluginListModel->setStringList(m_PluginList);
+		m_PluginMap.insert(std::pair<QString, QString>(mstring, filename));
+	}
+	else {
+		qWarning() << "Error reading plugin: " << filename;
+	}
+}
+
+QStringListModel* PluginLoader::getPluginList() {
+	return m_PluginListModel;
+}
+
+QObject* PluginLoader::getPluginInstance() {
+	return (m_PluginLoader->instance());
+}
+
 QJsonObject PluginLoader::getPluginMetaData() const
 {
 	return m_MetaData;
@@ -245,3 +285,18 @@ void PluginLoader::readMetaDataFromPlugin()
 {
 	m_MetaData = m_PluginLoader->metaData().value("MetaData").toObject();
 }
+
+bool PluginLoader::getIsPluginLoaded() {
+	return m_isPluginLoaded;
+}
+
+QString PluginLoader::getCurrentPluginName() {
+	return m_currentPluginName;
+}
+const std::map<QString, QString> &PluginLoader::getPluginMap() const
+{
+    return m_PluginMap;
+}
+
+
+
