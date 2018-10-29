@@ -218,14 +218,14 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 {
 	bool retval = false;
 	if (m_PluginLoader->isLoaded()) {
-
 		m_PluginLoader->unload();
 	}
 
 	bool isLib = QLibrary::isLibrary(filename);
 
 	if (isLib) {
-
+		
+		auto oldPath = PluginLoader::addDllPath(filename.toStdString());
 		m_PluginLoader->setFileName(filename);
 
 		readMetaDataFromPlugin();
@@ -237,7 +237,9 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
         if (!m_PluginLoader->isLoaded())
 		{
 		    qWarning() << ss.c_str();
+			retval = false;
 		}
+		PluginLoader::delDllPath(oldPath);
 	}
 	else {
 		retval = false;
