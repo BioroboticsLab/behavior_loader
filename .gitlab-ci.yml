@@ -74,3 +74,4 @@ trigger dependents:
   <<: *base_ubuntu_18_04
   script:
     - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://git.imp.fu-berlin.de/api/v4/projects/3654/trigger/pipeline
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://git.imp.fu-berlin.de/api/v4/projects/3464/trigger/pipeline

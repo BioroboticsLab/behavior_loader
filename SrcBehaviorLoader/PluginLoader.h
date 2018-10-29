@@ -20,7 +20,7 @@ public:
 	* It will then be added to the stringlist and is selectable via "loadPluginFromName".
 	* This function does not actually set the plugin instance.
 	*/
-	void addToPluginList(QString p);
+	int addToPluginList(QString filename, QString suffix);
 	
 	/**
 	* Returns a QStrinListModel with the names of all seen Plugins.

@@ -172,6 +172,10 @@ bool endsWith(std::string value, std::string ending)
     return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
+bool validSuffix(std::string f, std::string suffix){
+	return (endsWith(f,suffix+".dll") || endsWith(f,suffix+".so"));
+}
+
 std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<std::string> list, std::string suffix){
 	//Search directories
     std::vector<std::string> filesFromFolders;
@@ -182,12 +186,12 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
             if (!file.empty() && file[file.size() - 1] == '/') {
                 for (auto& p : std::filesystem::directory_iterator(file)) {
 					std::string s = p.path().string();
-					if(endsWith(s,suffix+".dll") || endsWith(s,suffix+".so"))
+					if(validSuffix(s, suffix))
                     	filesFromFolders.push_back(s);
                 }
             }
             else {
-				if(endsWith(f,suffix+".dll") || endsWith(f,suffix+".so"))
+				if(validSuffix(f, suffix))
                 	filesFromFolders.push_back(f);
             }
         }
@@ -247,7 +251,9 @@ bool PluginLoader::loadPluginFromName(QString name) {
 	return loadPluginFromFilename(filename);
 }
 
-void PluginLoader::addToPluginList(QString filename) {
+int PluginLoader::addToPluginList(QString filename, QString suffix) {
+	if (!validSuffix(filename.toStdString(), suffix.toStdString()))
+		return 1;
 
 	bool isLib = QLibrary::isLibrary(filename);
 
@@ -264,8 +270,10 @@ void PluginLoader::addToPluginList(QString filename) {
 		m_PluginMap.insert(std::pair<QString, QString>(mstring, filename));
 	}
 	else {
+		return 2;
 		qWarning() << "Error reading plugin: " << filename;
 	}
+	return 0;
 }
 
 QStringListModel* PluginLoader::getPluginList() {
