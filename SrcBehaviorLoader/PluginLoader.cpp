@@ -13,9 +13,9 @@
 #include <QFileInfo>
 #define MAX_KEY_LENGTH 255
 #define MAX_VALUE_NAME 16383
- 
+
 std::vector<std::string> QueryKey(HKEY hKey, std::string path) 
-{ 
+{
 	//See https://docs.microsoft.com/en-us/windows/desktop/sysinfo/enumerating-registry-subkeys
 	std::vector<std::string> list;
     TCHAR    achClass[MAX_PATH] = TEXT("");  // buffer for class name 
@@ -28,12 +28,12 @@ std::vector<std::string> QueryKey(HKEY hKey, std::string path)
     DWORD    cbMaxValueData;       // longest value data 
     DWORD    cbSecurityDescriptor; // size of security descriptor 
     FILETIME ftLastWriteTime;      // last write time 
- 
-    DWORD i, retCode; 
- 
+
+    DWORD i, retCode;
+
     TCHAR  achValue[MAX_VALUE_NAME]; 
     DWORD cchValue = MAX_VALUE_NAME; 
- 
+
     // Get the class name and the value count. 
     retCode = RegQueryInfoKey(
         hKey,                    // key handle 

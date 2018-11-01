@@ -8,8 +8,14 @@
 #include <map>
 #include <memory>
 
+/**
+ * \class PluginLoader
+ * This class loads Qt-Plugins, the related metadata and files the plugin depends on.
+ * \author Hauke Mönck, Gregor Barth
+ */
+
 class PluginLoader : QObject
-{ 
+{
 	Q_OBJECT
 public:
 	explicit PluginLoader(QObject *parent = 0);
@@ -29,7 +35,8 @@ public:
 	QStringListModel* getPluginList();
 
 	/**
-	* Loads a BioTracker Plugin from a filpaht. It returns true if the Plugin could be loaded, otherwise false.
+	* Loads a BioTracker Plugin from a file path. It returns true if the Plugin could be loaded, otherwise false.
+	* The loaded plugin acts as singleton!
 	*/
 	bool loadPluginFromFilename(QString const& filename);
 
