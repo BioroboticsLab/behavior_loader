@@ -6,6 +6,7 @@
 #include "QStringListModel"
 #include "QPointer"
 #include <map>
+#include <memory>
 
 class PluginLoader : QObject
 { 
