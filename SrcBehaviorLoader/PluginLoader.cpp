@@ -205,6 +205,7 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
 
 PluginLoader::PluginLoader(QObject *parent)
 {
+	m_MetaData = nullptr;
 	m_PluginLoader = new QPluginLoader(this);
 	m_PluginListModel = new QStringListModel();
 }
@@ -233,6 +234,7 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 		retval = m_PluginLoader->load();
 		QString s = m_PluginLoader->errorString();
 		std::string ss = s.toStdString();
+		addPluginnameToLists(getCurrentPluginName(), filename);
 
         if (!m_PluginLoader->isLoaded())
 		{
@@ -246,6 +248,14 @@ bool PluginLoader::loadPluginFromFilename(QString const& filename)
 	}
 
 	return retval;
+}
+
+void PluginLoader::addPluginnameToLists(QString mstring, QString filename)
+{	
+	if (!m_PluginList.contains(mstring))
+		m_PluginList.append(mstring);
+	m_PluginListModel->setStringList(m_PluginList);
+	m_PluginMap.insert(std::pair<QString, QString>(mstring, filename));
 }
 
 bool PluginLoader::loadPluginFromName(QString name) {
@@ -266,10 +276,7 @@ int PluginLoader::addToPluginList(QString filename, QString suffix) {
 		QJsonValue pluginMeda(loader.metaData().value("MetaData"));
 		QJsonObject metaObj = pluginMeda.toObject();
 		QString mstring = metaObj.value("name").toString();
-		if (!m_PluginList.contains(mstring))
-			m_PluginList.append(mstring);
-		m_PluginListModel->setStringList(m_PluginList);
-		m_PluginMap.insert(std::pair<QString, QString>(mstring, filename));
+		addPluginnameToLists(mstring, filename);
 	}
 	else {
 		return 2;
@@ -288,12 +295,14 @@ QObject* PluginLoader::getPluginInstance() {
 
 QJsonObject PluginLoader::getPluginMetaData() const
 {
-	return m_MetaData;
+	if (m_MetaData == nullptr)
+		qFatal("(getPluginMetaData) No plugin loaded");
+	return *m_MetaData;
 }
 
 void PluginLoader::readMetaDataFromPlugin()
 {
-	m_MetaData = m_PluginLoader->metaData().value("MetaData").toObject();
+	m_MetaData = std::make_shared<QJsonObject>(m_PluginLoader->metaData().value("MetaData").toObject());
 }
 
 bool PluginLoader::getIsPluginLoaded() {
@@ -301,7 +310,9 @@ bool PluginLoader::getIsPluginLoaded() {
 }
 
 QString PluginLoader::getCurrentPluginName() {
-	return m_currentPluginName;
+	if (m_MetaData == nullptr)
+		return "Error name";
+	return m_MetaData->value("name").toString();
 }
 const std::map<QString, QString> &PluginLoader::getPluginMap() const
 {

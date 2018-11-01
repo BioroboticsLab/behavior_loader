@@ -68,6 +68,8 @@ public:
 
 private:
 
+	void addPluginnameToLists(QString name, QString filename);
+
 	//a map containing the mapping "plugin name -> filename"
 	std::map<QString, QString> m_PluginMap;
 
@@ -80,16 +82,13 @@ private:
 	// The QT object to actually load the plugins
 	QPluginLoader *m_PluginLoader;
 
-	QJsonObject m_MetaData;
+	std::shared_ptr<QJsonObject> m_MetaData;
 
 	//nomen est omen
 	bool m_isPluginLoaded;
 
 	// List of all available plugins 
 	QStringList m_PluginList;
-
-	//Name of the currently loaded plugin
-	QString m_currentPluginName;
 
 	// Entire ListModel of the metadata (actually containing all metadata, not only name)
 	QStringListModel* m_PluginListModel;
