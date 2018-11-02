@@ -134,6 +134,12 @@ bool WinSetEnv(const char* name, const char* toWhat){
 }
 #endif
 
+bool is_shared_library(std::filesystem::path const& p)
+{
+       auto extension = p.extension();
+       return extension == ".so" || extension == ".dylib" || extension == ".dll";
+}
+
 const char* PluginLoader::addDllPath(std::string f)
 {
 	//Get the directory of the DLL/*.so and add it to the PATH env variable.
@@ -180,26 +186,41 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
 	//Search directories
     std::vector<std::string> filesFromFolders;
 
-    for (auto f: list) {
-        std::string file = f;
-        try {
-            if (!file.empty() && file[file.size() - 1] == '/') {
-                for (auto& p : std::filesystem::directory_iterator(file)) {
-					std::string s = p.path().string();
-					if(validSuffix(s, suffix))
-                    	filesFromFolders.push_back(s);
-                }
-            }
-            else {
-				if(validSuffix(f, suffix))
-                	filesFromFolders.push_back(f);
-            }
-        }
-        catch (...){
-            qWarning() << "Could not read file/directory: " << file.c_str();
-        }
-    }
-	
+	for (auto f: list)
+	{
+		auto path = std::filesystem::path(f);
+		if (path.empty())
+		{
+			continue;
+		}
+		if (std::filesystem::is_directory(path))
+		{
+			try
+			{
+				for (auto& e : std::filesystem::directory_iterator(path))
+				{
+					auto p = e.path();
+					if (is_shared_library(p) && p.replace_extension().extension() == ".robo_tracker")
+					{
+						filesFromFolders.push_back(p.string());
+					}
+				}
+			}
+			catch (std::filesystem::filesystem_error const& e)
+			{
+				qWarning() << e.what();
+			}
+		}
+		else if (is_shared_library(path))
+		{
+			filesFromFolders.push_back(f);
+		}
+		else
+		{
+			qWarning() << "Neither a directory, nor a shared library:" << f.data();
+		}
+	}
+
 	return filesFromFolders;
 }
 
