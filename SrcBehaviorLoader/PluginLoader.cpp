@@ -200,7 +200,7 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
                 for (auto& e : std::filesystem::directory_iterator(path))
                 {
                     auto p = e.path();
-                    if (is_shared_library(p) && p.replace_extension().extension() == ".robo_tracker")
+                    if (is_shared_library(p) && p.replace_extension().extension() == suffix)
                     {
                         filesFromFolders.push_back(p.string());
                     }
