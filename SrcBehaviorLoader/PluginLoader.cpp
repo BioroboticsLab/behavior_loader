@@ -1,8 +1,17 @@
 #include "PluginLoader.h"
 #include <QDebug>
 #include <vector>
-#include <filesystem>
 #include <sstream>
+
+#if __has_include(<filesystem>)
+    #include <filesystem>
+#else
+    #include <experimental/filesystem>
+    namespace std
+    {
+        namespace filesystem = std::experimental::filesystem;
+    };
+#endif
 
 #ifdef _WIN32
 #include <stdio.h>
