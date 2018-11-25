@@ -32,7 +32,8 @@ stages:
       - build
     expire_in: 1 day
   before_script:
-    - C:/VsDevEnv.ps1 -arch=amd64
+    - . /Library.ps1
+    - VSDevEnv -arch=amd64 -vcvars_ver="14.15"
 
 build ubuntu-18.04:
   <<: *build_ubuntu_18_04
@@ -65,8 +66,6 @@ package windows:
   <<: *base_windows
   dependencies:
     - build windows
-  before_script:
-    - C:/VsDevEnv.ps1 -arch=amd64
   <<: *package
 
 trigger dependents:
