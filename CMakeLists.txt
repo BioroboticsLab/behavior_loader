@@ -1,17 +1,10 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe --abbrev=0 --tags" OUTPUT_VARIABLE GIT_TAG)
 
-cmake_policy (SET CMP0020 NEW)
-
-message("Git tag: " ${GIT_TAG})
-project(RF_behavior_loader
+project(robofish-behavior_loader
     VERSION ${GIT_TAG}
     LANGUAGES CXX)
-	
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    option(PACKAGE_WINDOWS_MSI "Create .msi package" OFF)
-endif()
 
 include(GNUInstallDirs)
 
@@ -20,32 +13,14 @@ set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory fo
 set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME} CACHE PATH "Installation directory for header files")
 set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME} CACHE STRING "Installation directory for cmake configuration files")
 
-set(TN RF_behavior_loader)
-add_library(${TN} STATIC)
-set_target_properties(${TN} PROPERTIES OUTPUT_NAME rf_behavior_loader)
-include(SrcBehaviorLoader/CMakeLists.txt)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+include(Headers)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    target_link_libraries(${TN} stdc++fs)
-endif()
-
-install(
-    TARGETS
-        RF_behavior_loader
-    EXPORT
-        ${PROJECT_NAME}Targets
-    RUNTIME DESTINATION "${INSTALL_BINDIR}"
-    ARCHIVE DESTINATION "${INSTALL_LIBDIR}"
-)
-foreach(file ${RF_behavior_loader_PUBLIC_HEADERS})
-    file(RELATIVE_PATH rel_path "${CMAKE_CURRENT_LIST_DIR}/SrcBehaviorLoader" ${file})
-    get_filename_component(install_path ${rel_path} DIRECTORY)
-    install(FILES ${file} DESTINATION "${INSTALL_INCLUDEDIR}/${install_path}")
-endforeach()
+add_subdirectory(SrcBehaviorLoader)
 
 export(
     TARGETS
-        RF_behavior_loader
+        ${PROJECT_NAME}
     FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake"
 )
 
@@ -73,12 +48,6 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${INSTALL_CONFIGDIR}
-)
-
-install(
-    FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/VSSugar.cmake
-    DESTINATION ${INSTALL_CONFIGDIR}/Modules/${PROJECT_NAME}
 )
 
 set(CPACK_PACKAGE_VERSION ${GIT_TAG})
