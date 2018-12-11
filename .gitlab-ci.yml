@@ -4,48 +4,63 @@ stages:
   - deploy
 
 
-.base ubuntu-18.04: &base_ubuntu_18_04
+.ubuntu-18.04:
   tags: [ linux, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:ubuntu-18.04
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-ubuntu18.04
 
-.base windows: &base_windows
+.windows:
   tags: [ windows, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:windows
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows
 
 
-.build ubuntu-18.04: &build_ubuntu_18_04
+.gcc8: &gcc8
+  CC: gcc-8
+  CXX: g++-8
+
+.msvc15.9: &msvc15_9
+  VSDevEnv -arch=amd64 -vcvars_ver="14.16"
+
+.debug: &debug
+  CMAKE_BUILD_TYPE: Debug
+
+.release: &release
+  CMAKE_BUILD_TYPE: Release
+
+
+.build ubuntu-18.04:
+  extends: .ubuntu-18.04
   stage: build
-  <<: *base_ubuntu_18_04
-  variables:
-    CC: gcc-8
-    CXX: g++-8
   artifacts:
     paths:
       - build
     expire_in: 1 day
+  script:
+    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" -G Ninja -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
+    - ninja -C build
 
-.build windows: &build_windows
+.build windows:
+  extends: .windows
   stage: build
-  <<: *base_windows
   artifacts:
     paths:
       - build
     expire_in: 1 day
-  before_script:
-    - . /Library.ps1
-    - VSDevEnv -arch=amd64 -vcvars_ver="14.15"
+  script:
+    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" -G Ninja -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_DIR/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="$env:VCPKG_TRIPLET" -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
+    - ninja -C build
 
 build ubuntu-18.04:
-  <<: *build_ubuntu_18_04
-  script:
-    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
-    - ninja -C build
+  extends: .build ubuntu-18.04
+  variables:
+    <<: [ *gcc8, *release ]
 
 build windows:
-  <<: *build_windows
-  script:
-    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_PREFIX_PATH="$env:CMAKE_PREFIX_PATH" -DCPACK_PACKAGE_DIRECTORY="$env:PACKAGE_DIR" -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
-    - ninja -C build
+  extends: .build windows
+  variables:
+    <<: [ *release ]
+  before_script:
+    - . $Profile
+    - *msvc15_9
 
 .package: &package
   stage: package
@@ -57,20 +72,22 @@ build windows:
     - ninja -C build package
 
 package ubuntu-18.04:
-  <<: *base_ubuntu_18_04
+  extends: .ubuntu-18.04
   dependencies:
     - build ubuntu-18.04
   <<: *package
 
 package windows:
-  <<: *base_windows
+  extends: .windows
   dependencies:
     - build windows
   <<: *package
 
 trigger dependents:
-  stage: deploy
-  <<: *base_ubuntu_18_04
-  script:
-    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://git.imp.fu-berlin.de/api/v4/projects/3654/trigger/pipeline
-    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://git.imp.fu-berlin.de/api/v4/projects/3464/trigger/pipeline
+ extends: .ubuntu-18.04
+ stage: deploy
+ script:
+    - . /etc/profile.d/robofish.sh
+    - gitlab-trigger-pipeline bioroboticslab%2Frobofish%2Fsimulator     $CI_JOB_TOKEN master
+    - gitlab-trigger-pipeline bioroboticslab%2Frobofish%2Frobo_tracker  $CI_JOB_TOKEN master
+    - gitlab-trigger-pipeline bioroboticslab%2Fbiotracker%2Fbiotracker  $CI_JOB_TOKEN master
