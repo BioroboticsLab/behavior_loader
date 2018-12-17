@@ -211,7 +211,7 @@ std::vector<std::string> PluginLoader::searchDirectoriesForPlugins(std::vector<s
                     auto p = e.path();
                     if (is_shared_library(p) && p.replace_extension().extension() == suffix)
                     {
-                        filesFromFolders.push_back(p.string());
+                        filesFromFolders.push_back(e.path().string());
                     }
                 }
             }
