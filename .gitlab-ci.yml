@@ -86,6 +86,7 @@ package windows:
 trigger dependents:
  extends: .ubuntu-18.04
  stage: deploy
+ dependencies: []
  script:
     - . /etc/profile.d/robofish.sh
     - gitlab-trigger-pipeline bioroboticslab%2Frobofish%2Fsimulator     $CI_JOB_TOKEN master
