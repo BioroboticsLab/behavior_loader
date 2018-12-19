@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 
-exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe --abbrev=0 --tags" OUTPUT_VARIABLE GIT_TAG)
-
+file(READ VERSION PROJECT_VERSION)
 project(robofish-behavior_loader
-    VERSION ${GIT_TAG}
+    VERSION ${PROJECT_VERSION}
     LANGUAGES CXX)
 
 include(GNUInstallDirs)
@@ -50,7 +49,6 @@ install(
     DESTINATION ${INSTALL_CONFIGDIR}
 )
 
-set(CPACK_PACKAGE_VERSION ${GIT_TAG})
 set(CPACK_GENERATOR "TXZ")
 
 include(CPack)
