@@ -83,12 +83,18 @@ package windows:
     - build windows
   <<: *package
 
-trigger dependents:
- extends: .ubuntu-18.04
- stage: deploy
- dependencies: []
- script:
-    - . /etc/profile.d/robofish.sh
-    - gitlab-trigger-pipeline bioroboticslab%2Frobofish%2Fsimulator     $CI_JOB_TOKEN master
-    - gitlab-trigger-pipeline bioroboticslab%2Frobofish%2Frobo_tracker  $CI_JOB_TOKEN master
-    - gitlab-trigger-pipeline bioroboticslab%2Fbiotracker%2Fbiotracker  $CI_JOB_TOKEN master
+trigger robofish/simulator:
+  stage: deploy
+  trigger:
+    project: bioroboticslab/robofish/simulator
+
+trigger robofish/robo_tracker:
+  stage: deploy
+  trigger:
+    project: bioroboticslab/robofish/robo_tracker
+
+trigger biotracker/biotracker:
+  stage: deploy
+  trigger:
+    project: bioroboticslab/biotracker/biotracker
+
