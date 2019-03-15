@@ -88,10 +88,10 @@ trigger robofish/simulator:
   trigger:
     project: bioroboticslab/robofish/simulator
 
-trigger robofish/robo_tracker:
+trigger robofish/robotracker:
   stage: deploy
   trigger:
-    project: bioroboticslab/robofish/robo_tracker
+    project: bioroboticslab/robofish/robotracker
 
 trigger biotracker/biotracker:
   stage: deploy
