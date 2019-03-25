@@ -2,16 +2,7 @@
 #include <QDebug>
 #include <vector>
 #include <sstream>
-
-#if __has_include(<filesystem>)
-    #include <filesystem>
-#else
-    #include <experimental/filesystem>
-    namespace std
-    {
-        namespace filesystem = std::experimental::filesystem;
-    };
-#endif
+#include <filesystem>
 
 #ifdef _WIN32
 #include <stdio.h>
