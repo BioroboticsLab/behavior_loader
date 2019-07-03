@@ -8,9 +8,9 @@ stages:
   tags: [ linux, docker ]
   image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-ubuntu18.04
 
-.windows:
-  tags: [ windows, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows
+.windows-1809:
+  tags: [ windows-1809, docker ]
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows1809
 
 
 .gcc8: &gcc8
@@ -18,49 +18,41 @@ stages:
   CXX: g++-8
 
 .msvc15.9: &msvc15_9
-  VSDevEnv -arch=amd64 -vcvars_ver="14.16"
-
-.debug: &debug
-  CMAKE_BUILD_TYPE: Debug
+  VCVARS_VER: '14.16'
 
 .release: &release
   CMAKE_BUILD_TYPE: Release
 
+.debug: &debug
+  CMAKE_BUILD_TYPE: Debug
 
-.build ubuntu-18.04:
-  extends: .ubuntu-18.04
+
+.build: &build
   stage: build
   artifacts:
     paths:
       - build
     expire_in: 1 day
-  script:
-    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" -G Ninja -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
-    - ninja -C build
-
-.build windows:
-  extends: .windows
-  stage: build
-  artifacts:
-    paths:
-      - build
-    expire_in: 1 day
-  script:
-    - cmake -Bbuild "-H." -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" -G Ninja -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_DIR/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="$env:VCPKG_TRIPLET" -DCMAKE_SUPPRESS_REGENERATION=ON -DCMAKE_SKIP_PACKAGE_ALL_DEPENDENCY=ON
-    - ninja -C build
+  script: ./.gitlab-ci.py build
 
 build ubuntu-18.04:
-  extends: .build ubuntu-18.04
+  extends: .ubuntu-18.04
+  <<: *build
   variables:
     <<: [ *gcc8, *release ]
 
-build windows:
-  extends: .build windows
+build windows-1809:
+  extends: .windows-1809
+  <<: *build
   variables:
-    <<: [ *release ]
-  before_script:
-    - . $Profile
-    - *msvc15_9
+    <<: [ *msvc15_9, *release ]
+
+build windows-1809[debug]:
+  extends: .windows-1809
+  <<: *build
+  variables:
+    <<: [ *msvc15_9, *debug ]
+
 
 .package: &package
   stage: package
@@ -68,8 +60,7 @@ build windows:
     paths:
       - build/*.tar.xz
     expire_in: 1 week
-  script:
-    - ninja -C build package
+  script: ./.gitlab-ci.py package
 
 package ubuntu-18.04:
   extends: .ubuntu-18.04
@@ -77,11 +68,18 @@ package ubuntu-18.04:
     - build ubuntu-18.04
   <<: *package
 
-package windows:
-  extends: .windows
+package windows-1809:
+  extends: .windows-1809
   dependencies:
-    - build windows
+    - build windows-1809
   <<: *package
+
+package windows-1809[debug]:
+  extends: .windows-1809
+  dependencies:
+    - build windows-1809[debug]
+  <<: *package
+
 
 trigger robofish/simulator:
   stage: deploy
@@ -97,4 +95,3 @@ trigger biotracker/biotracker:
   stage: deploy
   trigger:
     project: bioroboticslab/biotracker/biotracker
-
