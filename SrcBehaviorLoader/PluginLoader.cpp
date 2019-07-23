@@ -76,11 +76,13 @@ std::vector<std::string> QueryKey(HKEY hKey, std::string path)
                 {
                     qWarning() << "Error opening registry path " << path.c_str(); 
                     regKey.Close();
+                    continue;
                 }
                 if( ERROR_SUCCESS != regKey.QueryStringValue(achValue,szBuffer,&dwBufferSize))
                 {
                     qWarning() << "Error opening registry value " << achValue;
                     regKey.Close();
+                    continue;
                 }
 
                 std::string fp = szBuffer;
