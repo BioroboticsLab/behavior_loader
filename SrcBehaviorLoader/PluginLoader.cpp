@@ -72,15 +72,15 @@ std::vector<std::string> QueryKey(HKEY hKey, std::string path)
                 CHAR szBuffer[512];
                 ULONG dwBufferSize = sizeof(szBuffer);
 
-                if(ERROR_SUCCESS != regKey.Open(HKEY_LOCAL_MACHINE, path.c_str()))
+                if(auto error_code = regKey.Open(HKEY_LOCAL_MACHINE, path.c_str()); error_code != ERROR_SUCCESS)
                 {
-                    qWarning() << "Error opening registry path " << path.c_str(); 
+                    qWarning() << "Error opening windows registry path " << path.c_str() << ": " << error_code;
                     regKey.Close();
                     continue;
                 }
-                if( ERROR_SUCCESS != regKey.QueryStringValue(achValue,szBuffer,&dwBufferSize))
+                if(auto error_code = regKey.QueryStringValue(achValue,szBuffer,&dwBufferSize); error_code != ERROR_SUCCESS)
                 {
-                    qWarning() << "Error opening registry value " << achValue;
+                    qWarning() << "Error opening windows registry value " << achValue << ": " << error_code;
                     regKey.Close();
                     continue;
                 }
