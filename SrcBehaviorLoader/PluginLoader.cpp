@@ -5,14 +5,14 @@
 #include <filesystem>
 
 #ifdef _WIN32
-#include <stdio.h>
-#include <tchar.h>
-#include <string.h>
-#include <atlbase.h>
-#include <QDebug>
-#include <QFileInfo>
-#define MAX_KEY_LENGTH 255
-#define MAX_VALUE_NAME 16383
+	#include <stdio.h>
+	#include <tchar.h>
+	#include <string.h>
+	#include <atlbase.h>
+	#include <QDebug>
+	#include <QFileInfo>
+	#define MAX_KEY_LENGTH 255
+	#define MAX_VALUE_NAME 16383
 
 std::vector<std::string> QueryKey(HKEY hKey, std::string path)
 {
@@ -299,7 +299,10 @@ int PluginLoader::addToPluginList(QString filename, QString suffix)
 	return 0;
 }
 
-QStringListModel* PluginLoader::getPluginList() { return m_PluginListModel; }
+QStringListModel* PluginLoader::getPluginList()
+{
+	return m_PluginListModel;
+}
 
 QObject* PluginLoader::getPluginInstance()
 {
@@ -319,7 +322,10 @@ void PluginLoader::readMetaDataFromPlugin()
 	   m_PluginLoader->metaData().value("MetaData").toObject());
 }
 
-bool PluginLoader::getIsPluginLoaded() { return m_isPluginLoaded; }
+bool PluginLoader::getIsPluginLoaded()
+{
+	return m_isPluginLoaded;
+}
 
 QString PluginLoader::getCurrentPluginName()
 {
