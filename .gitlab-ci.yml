@@ -96,11 +96,6 @@ package windows-1809[debug]:
   <<: *package
 
 
-trigger robofish/simulator:
-  stage: deploy
-  trigger:
-    project: bioroboticslab/robofish/simulator
-
 trigger robofish/robotracker:
   stage: deploy
   trigger:
