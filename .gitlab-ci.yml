@@ -7,10 +7,6 @@ stages:
   tags: [ linux, docker ]
   image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:centos-7
 
-.ubuntu-18.04:
-  tags: [ linux, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-ubuntu18.04
-
 .windows-1809:
   tags: [ windows-1809, docker ]
   image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows1809
@@ -44,12 +40,6 @@ build centos-7:
   variables:
     <<: [ *release ]
 
-build ubuntu-18.04:
-  extends: .ubuntu-18.04
-  <<: *build
-  variables:
-    <<: [ *gcc8, *release ]
-
 build windows-1809:
   extends: .windows-1809
   <<: *build
@@ -75,12 +65,6 @@ package centos-7:
   extends: .centos-7
   dependencies:
     - build centos-7
-  <<: *package
-
-package ubuntu-18.04:
-  extends: .ubuntu-18.04
-  dependencies:
-    - build ubuntu-18.04
   <<: *package
 
 package windows-1809:
