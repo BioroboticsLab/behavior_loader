@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
-file(READ VERSION PROJECT_VERSION)
+exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe --dirty --always --exclude '*'" OUTPUT_VARIABLE SOURCE_VERSION)
+
 project(robofish-behavior_loader
-    VERSION ${PROJECT_VERSION}
-    LANGUAGES CXX)
+    LANGUAGES CXX
+)
 
 include(GNUInstallDirs)
 
@@ -32,8 +33,8 @@ include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
+    VERSION ${SOURCE_VERSION}
+    COMPATIBILITY ExactVersion
 )
 
 configure_package_config_file(
@@ -50,5 +51,6 @@ install(
 )
 
 set(CPACK_GENERATOR "TXZ")
+set(CPACK_PACKAGE_VERSION "${SOURCE_VERSION}")
 
 include(CPack)
