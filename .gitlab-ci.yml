@@ -1,29 +1,21 @@
 stages:
   - build
   - package
-  - deploy
+  - trigger
 
-.centos-7:
+.centos:
   tags: [ linux, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:centos-7
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:centos
 
-.windows-1809:
-  tags: [ windows-1809, docker ]
-  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows-1809
+.windows:
+  tags: [ windows, docker ]
+  image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows
+  before_script:
+    - . $Profile.AllUsersAllHosts
 
-
-.gcc8: &gcc8
-  CC: gcc-8
-  CXX: g++-8
-
-.msvc15.9: &msvc15_9
-  VCVARS_VER: '14.16'
 
 .release: &release
   CMAKE_BUILD_TYPE: Release
-
-.debug: &debug
-  CMAKE_BUILD_TYPE: Debug
 
 
 .build: &build
@@ -32,26 +24,9 @@ stages:
     paths:
       - build
     expire_in: 1 day
-  script: ./.gitlab-ci.py build
-
-build centos-7:
-  extends: .centos-7
-  <<: *build
-  variables:
-    <<: [ *release ]
-
-build windows-1809:
-  extends: .windows-1809
-  <<: *build
-  variables:
-    <<: [ *msvc15_9, *release ]
-
-build windows-1809[debug]:
-  extends: .windows-1809
-  <<: *build
-  variables:
-    <<: [ *msvc15_9, *debug ]
-
+  script:
+    - ./ci/configure.py
+    - ./ci/compile.py
 
 .package: &package
   stage: package
@@ -59,33 +34,46 @@ build windows-1809[debug]:
     paths:
       - build/*.tar.xz
     expire_in: 1 week
-  script: ./.gitlab-ci.py package
+  script:
+    - ./ci/package.py
 
-package centos-7:
-  extends: .centos-7
+
+build centos:
+  extends: .centos
+  <<: *build
+  variables:
+    <<: [ *release ]
+
+build windows:
+  extends: .windows
+  <<: *build
+  variables:
+    <<: [ *release ]
+
+
+package centos:
+  extends: .centos
   dependencies:
-    - build centos-7
+    - build centos
   <<: *package
 
-package windows-1809:
-  extends: .windows-1809
+package windows:
+  extends: .windows
   dependencies:
-    - build windows-1809
-  <<: *package
-
-package windows-1809[debug]:
-  extends: .windows-1809
-  dependencies:
-    - build windows-1809[debug]
+    - build windows
   <<: *package
 
 
 trigger robofish/robotracker:
-  stage: deploy
+  stage: trigger
+  only:
+    - master
   trigger:
     project: bioroboticslab/robofish/robotracker
 
 trigger biotracker/biotracker:
-  stage: deploy
+  stage: trigger
+  only:
+    - master
   trigger:
     project: bioroboticslab/biotracker/biotracker
