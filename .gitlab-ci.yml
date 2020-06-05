@@ -4,19 +4,17 @@ stages:
   - trigger
 
 .centos:
-  tags: [ linux, docker ]
+  tags: [linux, docker]
   image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:centos
 
 .windows:
-  tags: [ windows, docker ]
+  tags: [windows, docker]
   image: git.imp.fu-berlin.de:5000/bioroboticslab/robofish/docker:devel-windows
   before_script:
     - . $Profile.AllUsersAllHosts
 
-
 .release: &release
   CMAKE_BUILD_TYPE: Release
-
 
 .build: &build
   stage: build
@@ -37,19 +35,17 @@ stages:
   script:
     - ./ci/package.py
 
-
 build centos:
   extends: .centos
   <<: *build
   variables:
-    <<: [ *release ]
+    <<: [*release]
 
 build windows:
   extends: .windows
   <<: *build
   variables:
-    <<: [ *release ]
-
+    <<: [*release]
 
 package centos:
   extends: .centos
@@ -62,7 +58,6 @@ package windows:
   dependencies:
     - build windows
   <<: *package
-
 
 trigger robofish/robotracker:
   stage: trigger
