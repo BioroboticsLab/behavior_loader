@@ -59,13 +59,6 @@ package windows:
     - build windows
   <<: *package
 
-trigger robofish/robotracker:
-  stage: trigger
-  only:
-    - master
-  trigger:
-    project: bioroboticslab/robofish/robotracker
-
 trigger biotracker/biotracker:
   stage: trigger
   only:
