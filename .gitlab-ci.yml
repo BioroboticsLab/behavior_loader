@@ -62,6 +62,7 @@ stages:
 trigger biotracker/biotracker:
   stage: trigger
   only:
-    - master
+    - snapshot_20210303
   trigger:
     project: bioroboticslab/biotracker/biotracker
+    branch: snapshot_20210303
